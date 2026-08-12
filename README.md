@@ -186,4 +186,13 @@ Things you will hit if you try to run this today:
 
 ## License
 
-No repository-wide license file is present. Files under `src/shared/` carry **GNU AGPL v3** headers; files under `src/console/` and `src/tester/` carry `Copyright (c) 2012–2014 Miroslav Kudrnac. All rights reserved.` Vendored third-party code keeps its own terms — see `tbb/COPYING` for Intel TBB and the headers in `src/shared/zlib/`.
+Licensed under the **GNU Affero General Public License v3.0** — see [LICENSE](LICENSE). Note section 13: running a modified version to serve users over a network obliges you to offer them its source.
+
+Copyright © 2012–2014 Miroslav Kudrnac.
+
+Two exceptions, both vendored third-party code that keeps its own terms:
+
+* `tbb/` — Intel Threading Building Blocks, see `tbb/COPYING`.
+* `src/shared/zlib/` — zlib, see the headers in that directory.
+
+Some files under `src/console/` and `src/tester/` still carry older `All rights reserved` headers predating this license file. The repository-wide AGPL v3 above governs.
