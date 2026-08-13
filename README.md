@@ -93,6 +93,34 @@ Client opcodes are odd, the matching server reply is the next even number. Defin
 
 ## Building
 
+### CMake (any platform)
+
+```sh
+cmake -S . -B build
+cmake --build build          # -> build/transdb, build/transdb_tester
+```
+
+`CMakeLists.txt` builds the same sources as the Makefile: a `transdb_shared` static
+library, the `transdb` server, and the `transdb_tester` client. It picks the socket
+backend from the target platform (`CONFIG_USE_IOCP` on Windows, `CONFIG_USE_KEVENT`
+on macOS/BSD, `CONFIG_USE_EPOLL` on Linux, `CONFIG_USE_SELECT` otherwise) and
+compiles the vendored zlib rather than linking the system one, so the headers in
+`src/shared/zlib/` match the code they were built from.
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `TRANSDB_SOCKET_BACKEND` | per platform | Force `IOCP`, `KEVENT`, `EPOLL` or `SELECT` |
+| `TRANSDB_TBB_ROOT` | `./tbb` | Where to look for TBB before the system paths |
+| `TRANSDB_BUNDLED_ZLIB` | `ON` | Off links system zlib instead |
+| `TRANSDB_SCALABLE_ALLOCATOR` | `ON` | Off drops `tbbmalloc` and the matching define |
+| `TRANSDB_BUILD_TESTER` | `ON` | Off skips `src/tester/` |
+
+It still needs the dependencies the project has always needed: Python 2.7
+development headers (`-DPython2_ROOT_DIR=<prefix>` if they are not on the default
+search path) and Intel TBB. The bundled `tbb/lib/` holds x86_64 macOS dylibs only,
+and `src/shared/clib/Crc32/crc32_sse.c` uses x86 SSE4.2 inline assembly — neither
+works on Apple Silicon.
+
 ### Linux
 
 ```sh
