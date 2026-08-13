@@ -220,6 +220,8 @@ void DiskWriter::Process()
                     bool status = WriteDataWithRelocateFlag(hDataFile, rWriteAccessor);
                     if(status == false)
                     {
+                        //release accessor, next find must be done on empty accessor
+                        rWriteAccessor.release();
                         continue;
                     }
                     

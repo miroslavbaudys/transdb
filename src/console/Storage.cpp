@@ -631,36 +631,40 @@ void Storage::DefragmentFreeSpace(uint64 socketID, uint32 token, uint32 flags)
 void Storage::CheckMemory(LRUCache &rLRUCache)
 {
     uint64 xToDelete;
-    RecordIndexMap::accessor rWriteAccessor;
-    
+
     while(m_memoryUsed > g_cfg.MemoryLimit)
     {
         if(!rLRUCache.get(&xToDelete))
             break;
-        
-        //get record index
-        if(m_dataIndexes.find(rWriteAccessor, xToDelete))
+
+        //accessor must be released before next find, else the bucket stays locked
         {
-            //check if record does not wait in disk thread
-			if(rWriteAccessor->second.m_flags & eRIF_InDiskWriteQueue)
-                return;
-            
-            //can be NULL
-            if(rWriteAccessor->second.m_pBlockManager)
+            RecordIndexMap::accessor rWriteAccessor;
+
+            //get record index
+            if(m_dataIndexes.find(rWriteAccessor, xToDelete))
             {
-                //log
-                Log.Debug(__FUNCTION__, "Memory usage: " I64FMTD ", memory limit: " I64FMTD ", removing x: " I64FMTD " from memory.", m_memoryUsed.load(), g_cfg.MemoryLimit, xToDelete);
-                
-                //update memory usage
-                uint64 memoryUsage = blman_get_memory_usage(rWriteAccessor->second.m_pBlockManager);
-                m_memoryUsed -= memoryUsage;
-                
-                //clean memory
-                blman_destroy(rWriteAccessor->second.m_pBlockManager);
-                rWriteAccessor->second.m_pBlockManager = NULL;
+                //check if record does not wait in disk thread
+                if(rWriteAccessor->second.m_flags & eRIF_InDiskWriteQueue)
+                    return;
+
+                //can be NULL
+                if(rWriteAccessor->second.m_pBlockManager)
+                {
+                    //log
+                    Log.Debug(__FUNCTION__, "Memory usage: " I64FMTD ", memory limit: " I64FMTD ", removing x: " I64FMTD " from memory.", m_memoryUsed.load(), g_cfg.MemoryLimit, xToDelete);
+
+                    //update memory usage
+                    uint64 memoryUsage = blman_get_memory_usage(rWriteAccessor->second.m_pBlockManager);
+                    m_memoryUsed -= memoryUsage;
+
+                    //clean memory
+                    blman_destroy(rWriteAccessor->second.m_pBlockManager);
+                    rWriteAccessor->second.m_pBlockManager = NULL;
+                }
             }
         }
-        
+
         //delete from LRU
         if(rLRUCache.remove(xToDelete) == false)
         {
