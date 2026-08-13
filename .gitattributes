@@ -1,0 +1,15 @@
+# Language statistics overrides for GitHub Linguist.
+
+# Intel Threading Building Blocks — vendored third-party library.
+# Its HTML documentation (~21 MB) otherwise dominates the language bar.
+tbb/** linguist-vendored
+
+# zlib — vendored third-party library.
+src/shared/zlib/** linguist-vendored
+
+# Bootstrap 3.1.0 (minified) shipped with the web-console templates.
+Python/template_src/style.css linguist-vendored
+
+# Crash-dump / stack-walking helpers taken from public samples.
+src/shared/StackWalker.cpp linguist-vendored
+src/shared/StackWalker.h linguist-vendored
